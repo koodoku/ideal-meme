@@ -13,6 +13,7 @@ class DealService
     public function __construct(
         private readonly ApplicationRepository $applicationRepository,
         private readonly DepositaryRepository $depositaryRepository,
+        private readonly DealLogService $dealLogService
     ) {
     }
 
@@ -23,10 +24,9 @@ class DealService
             return;
         }
 
-        $appropriateApplication->getAction() === ActionEnum::BUY ?
-            $this->exchange($appropriateApplication, $application) :
-            $this->exchange($application, $appropriateApplication)
-        ;
+        $this->exchange($application, $appropriateApplication);
+
+        $this->dealLogService->registerDealLog($application, $appropriateApplication);
 
         $this->applicationRepository->removeApplication($application);
         $this->applicationRepository->removeApplication($appropriateApplication);
@@ -34,6 +34,11 @@ class DealService
 
     private function exchange(Application $buyApplication, Application $sellApplication): void
     {
+        if ($buyApplication->getAction() === ActionEnum::SELL) {
+            $this->exchange($sellApplication, $buyApplication);
+            return;
+        }
+
         $buyApplication
             ->getPortfolio()
             ->subBalance($buyApplication->getTotal())
