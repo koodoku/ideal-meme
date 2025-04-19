@@ -36,6 +36,17 @@ class DealLogRepository extends ServiceEntityRepository
             ->getResult()  //Выполняет запрос и возвращает  результат в виде массива объектов DealLog).
         ;
     }
+    public function findLatestByStock(Stock $stock): ?DealLog
+    {
+        return $this->createQueryBuilder('d')
+            ->where('d.stock = :stock')
+            ->setParameter('stock', $stock)
+            ->orderBy('d.timestamp', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
 }
 
 //Репозиторий DealLogRepository предоставляет методы для работы с данными о сделках (DealLog).

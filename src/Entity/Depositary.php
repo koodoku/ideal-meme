@@ -118,4 +118,5 @@ class Depositary
     {
         return $this->quantity - $this->freezeQuantity;
     }
+
 }
