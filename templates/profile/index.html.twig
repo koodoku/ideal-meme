@@ -12,7 +12,8 @@
         <br>
         {% for depositary in portfolio.depositaries %}
             {% set total = total + depositary.quantity %}
-            Stock name: {{ depositary.stock.name }}, quantity: {{ depositary.quantity }}
+            Stock name: {{ depositary.stock.name }}, quantity: {{ depositary.quantity }},
+            Delta: {{ delta(depositary) }}
             <br>
         {% endfor %}
         <br>
