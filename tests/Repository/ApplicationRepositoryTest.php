@@ -2,6 +2,12 @@
 
 namespace App\Tests\Repository;
 
+use App\Entity\Application;
+use App\Entity\Portfolio;
+use App\Entity\Stock;
+use App\Entity\User;
+use App\Enums\ActionEnum;
+use App\Repository\ApplicationRepository;
 use App\Tests\Fixture\ApplicationFixture;
 use App\Tests\Fixture\PortfolioFixture;
 use App\Tests\Fixture\StockFixture;
@@ -14,6 +20,12 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class ApplicationRepositoryTest extends KernelTestCase
 {
+    private UserFixture $userFixture;
+    private StockFixture $stockFixture;
+    private PortfolioFixture $portfolioFixture;
+    private ApplicationFixture $applicationFixture;
+
+    private ApplicationRepository $applicationRepository;
     protected function setUp(): void
     {
         $kernel = self::bootKernel();
@@ -23,17 +35,95 @@ class ApplicationRepositoryTest extends KernelTestCase
         $this->assertInstanceOf(EntityManager::class, $em);
 
         $loader = new Loader();
-        $loader->addFixture(new StockFixture());
-        $loader->addFixture(new UserFixture());
-        $loader->addFixture(new PortfolioFixture());
-        $loader->addFixture(new ApplicationFixture());
+        $loader->addFixture($this->stockFixture = new StockFixture());
+        $loader->addFixture($this->userFixture = new UserFixture());
+        $loader->addFixture($this->portfolioFixture = new PortfolioFixture());
+        $loader->addFixture($this->applicationFixture = new ApplicationFixture());
 
         $executor = new ORMExecutor($em, new ORMPurger());
         $executor->execute($loader->getFixtures());
+
+        $this->applicationRepository = $em->getRepository(Application::class);
     }
 
     public function testFindAppropriate(): void
     {
-        $this->assertTrue(true);
+        $application = $this->getAppropriateApplication();
+
+        $currentApplication = $this->applicationRepository->findAppropriate($application);
+
+        $this->assertEquals(
+            $this->applicationFixture->getReference(ApplicationFixture::ADMIN_APPLICATION_REFERENCE, Application::class),
+            $currentApplication
+        );
+    }
+
+    public function testFindAppropriateDifferentPrice(): void
+    {
+        $application = $this->getAppropriateApplication();
+        $application->setPrice(2);
+
+        $nonAppropriateApplication = $this->applicationRepository->findAppropriate($application);
+        $this->assertNull($nonAppropriateApplication);
+    }
+
+    public function testFindAppropriateDifferentQuantity(): void
+    {
+        $application = $this->getAppropriateApplication();
+        $application->setQuantity(2);
+
+        $nonAppropriateApplication = $this->applicationRepository->findAppropriate($application);
+        $this->assertNull($nonAppropriateApplication);
+    }
+
+    public function testFindAppropriateSameAction(): void
+    {
+        $application = $this->getAppropriateApplication();
+        $application->setAction(ActionEnum::SELL);
+
+        $nonAppropriateApplication = $this->applicationRepository->findAppropriate($application);
+        $this->assertNull($nonAppropriateApplication);
+    }
+
+    public function testFindAppropriateSamePortfolio(): void
+    {
+        $application = $this->getAppropriateApplication();
+        $application->setPortfolio($this->portfolioFixture->getReference(PortfolioFixture::PORTFOLIO_ADMIN_REFERENCE, Portfolio::class));
+
+        $nonAppropriateApplication = $this->applicationRepository->findAppropriate($application);
+        $this->assertNull($nonAppropriateApplication);
+    }
+
+    public function testFindAppropriateDifferentStock(): void
+    {
+        $application = $this->getAppropriateApplication();
+        $application->setStock($this->stockFixture->getReference(StockFixture::STOCK_ANOTHER_REFERENCE, Stock::class));
+
+        $nonAppropriateApplication = $this->applicationRepository->findAppropriate($application);
+        $this->assertNull($nonAppropriateApplication);
+    }
+
+    public function testFindAllByUser(): void
+    {
+        $userAdmin = $this->userFixture->getReference(UserFixture::USER_ADMIN_REFERENCE, User::class);
+        $applications = $this->applicationRepository->findAllByUser($userAdmin);
+
+        $this->assertCount(1, $applications);
+        $this->assertEquals(
+            $this->applicationFixture->getReference(ApplicationFixture::ADMIN_APPLICATION_REFERENCE, Application::class),
+            $applications[0]
+        );
+    }
+
+    private function getAppropriateApplication(): Application
+    {
+        $application = new Application();
+        $application->setPrice(1);
+        $application->setQuantity(1);
+        $application->setAction(ActionEnum::BUY);
+        $application->setPortfolio($this->portfolioFixture->getReference(PortfolioFixture::PORTFOLIO_USER_REFERENCE, Portfolio::class));
+        $application->setStock($this->stockFixture->getReference(StockFixture::STOCK_TEST_REFERENCE, Stock::class));
+
+        return $application;
     }
 }

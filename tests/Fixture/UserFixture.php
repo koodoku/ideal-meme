@@ -8,16 +8,26 @@ use Doctrine\Persistence\ObjectManager;
 
 class UserFixture extends AbstractFixture
 {
+    public const USER_ADMIN_REFERENCE = 'user-admin';
+    public const USER_USER_REFERENCE = 'user-user';
     public function load(ObjectManager $manager): void
     {
         $userAdmin = new User();
         $userAdmin->setUsername('admin');
-        $userAdmin->setPassword('password'); # +0.5 балла за использование PasswordHasher
+        $userAdmin->setPassword('admin_password'); # +0.5 балла за использование PasswordHasher
         $userAdmin->setRoles(['ROLE_ADMIN']);
 
         $manager->persist($userAdmin);
+
+        $this->addReference(self::USER_ADMIN_REFERENCE, $userAdmin);
+
+        $user = new User();
+        $user->setUsername('user');
+        $user->setPassword('user_password');
+
+        $manager->persist($user);
         $manager->flush();
 
-        $this->addReference('user-admin', $userAdmin);
+        $this->addReference(self::USER_USER_REFERENCE, $user);
     }
 }

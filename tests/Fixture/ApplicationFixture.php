@@ -12,6 +12,7 @@ use Doctrine\Persistence\ObjectManager;
 
 class ApplicationFixture extends AbstractFixture implements DependentFixtureInterface
 {
+    public const ADMIN_APPLICATION_REFERENCE = 'application-admin';
     public function load(ObjectManager $manager): void
     {
         $application = new Application();
@@ -19,14 +20,16 @@ class ApplicationFixture extends AbstractFixture implements DependentFixtureInte
         $application->setQuantity(1);
         $application->setAction(ActionEnum::SELL);
         $application->setPortfolio(
-            $this->getReference('portfolio-admin', Portfolio::class)
+            $this->getReference(PortfolioFixture::PORTFOLIO_ADMIN_REFERENCE, Portfolio::class)
         );
         $application->setStock(
-            $this->getReference('stock-test', Stock::class)
+            $this->getReference(StockFixture::STOCK_TEST_REFERENCE, Stock::class)
         );
 
         $manager->persist($application);
         $manager->flush();
+
+        $this->addReference(self::ADMIN_APPLICATION_REFERENCE, $application);
     }
 
     public function getDependencies(): array
