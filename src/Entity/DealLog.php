@@ -1,12 +1,12 @@
 <?php
-//хранение инф о совершенных сделках
+
 namespace App\Entity;
 
 use App\Repository\DealLogRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: DealLogRepository::class)]//связываеть сущность с репозиторием для выполнения зарпосов к
-class DealLog//потом свойства котрые предств полня в бд
+#[ORM\Entity(repositoryClass: DealLogRepository::class)]
+class DealLog
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -16,7 +16,7 @@ class DealLog//потом свойства котрые предств полн�
     #[ORM\Column]
     private ?\DateTimeImmutable $timestamp = null;
 
-    #[ORM\ManyToOne(inversedBy: 'dealLogs')] //связь
+    #[ORM\ManyToOne(inversedBy: 'dealLogs')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Stock $stock = null;
 
@@ -38,14 +38,13 @@ class DealLog//потом свойства котрые предств полн�
     {
         $this->timestamp = new \DateTimeImmutable('now');
     }
-//потом Для каждого свойства класса определены геттеры (методы 
-//для получения значения) и сеттеры (методы для установки значения).
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getTimestamp(): ?\DateTimeImmutable 
+    public function getTimestamp(): ?\DateTimeImmutable
     {
         return $this->timestamp;
     }
@@ -57,12 +56,12 @@ class DealLog//потом свойства котрые предств полн�
         return $this;
     }
 
-    public function getStock(): ?Stock//Возвращает связанный объект Stock
+    public function getStock(): ?Stock
     {
         return $this->stock;
     }
 
-    public function setStock(?Stock $stock): static// Устанавливает связь с объектом Stock
+    public function setStock(?Stock $stock): static
     {
         $this->stock = $stock;
 
@@ -117,8 +116,3 @@ class DealLog//потом свойства котрые предств полн�
         return $this;
     }
 }
-//Когда происходит сделка, создается объект DealLog, заполняется данными (время, цена, ценная бумага) и сохраняется в базе данных через репозиторий.
-
-//Связь с Stock позволяет отслеживать, по какой ценной бумаге была совершена сделка.
-
-//Время сделки (timestamp) автоматически устанавливается при создании объекта.
