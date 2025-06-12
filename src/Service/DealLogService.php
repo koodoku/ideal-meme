@@ -23,10 +23,10 @@ class DealLogService
 
         $dealLog = (new DealLog())
             ->setStock($buyApplication->getStock())
-            ->setPrice($buyApplication->getPrice()) // min($buyApplication->getPrice(), $sellApplication->getPrice()) для "комплесных" сделок
+            ->setPrice($buyApplication->getPrice())
             ->setBuyPortfolio($buyApplication->getPortfolio())
             ->setSellPortfolio($sellApplication->getPortfolio())
-            ->setQuantity($buyApplication->getQuantity()) // min($buyApplication->getQuantity(), $sellApplication->getQuantity()) для "комплесных" сделок
+            ->setQuantity($buyApplication->getQuantity())
         ;
 
         $this->dealLogRepository->saveDealLog($dealLog);

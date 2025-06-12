@@ -14,9 +14,9 @@ class DealLog
     private ?int $id = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $timestamp = null;
+    private ?\DateTimeImmutable $timestamp = null; //
 
-    #[ORM\ManyToOne(inversedBy: 'dealLogs')]
+    #[ORM\ManyToOne(inversedBy: 'dealLogs')] //inversedBy?
     #[ORM\JoinColumn(nullable: false)]
     private ?Stock $stock = null;
 
