@@ -39,7 +39,6 @@ class DealLogRepositoryTest extends KernelTestCase
 
         $this->executor = (new ORMExecutor($em, new ORMPurger()));
         $this->executor->execute($loader->getFixtures());
-
         $this->dealLogRepository = $em->getRepository(DealLog::class);
     }
 

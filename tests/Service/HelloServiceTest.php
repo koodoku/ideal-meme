@@ -26,21 +26,23 @@ class HelloServiceTest extends TestCase
      * @dataProvider provideLuckyNumbers
      */
     public function testGenerateLuckyNumber(string $expectedLuckyNumber): void
-    {
-        $helloObject = $this->createMock(Hello::class);
+    {// Arrange (Подготовка)
+        $helloObject = $this->createMock(Hello::class);//мок
         $helloObject
             ->expects($this->once())
-            ->method('getLuckyNumber')
+            ->method('getLuckyNumber') //Метод getLuckyNumber() мока Hello настраивается, чтобы вернуть ожидаемое число
             ->willReturn($expectedLuckyNumber)
         ;
 
-        $this->helloRepository
+        $this->helloRepository//мок репозитория
             ->expects($this->once())
             ->method('createLuckyNumber')
-            ->willReturn($helloObject)
+            ->willReturn($helloObject)//Этот мок говорит: если сервис вызовет createLuckyNumber(), верни заранее подготовленный Hello с нужным lucky number.
         ;
+        // Act (Действие)
+        $actualLuckyNumber = $this->helloService->generateLuckyNumber();//Здесь выполняется одно конкретное действие — вызов метода generateLuckyNumber() у сервиса.
 
-        $actualLuckyNumber = $this->helloService->generateLuckyNumber();
+        //Assert (Проверка) //Проверяется, что результат вызова generateLuckyNumber() совпадает с ожидаемым значением.
         $this->assertEquals(
             $expectedLuckyNumber,
             $actualLuckyNumber
