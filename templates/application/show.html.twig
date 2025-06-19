@@ -3,32 +3,20 @@
 {% block title %}Application{% endblock %}
 
 {% block body %}
-    <h1>Application</h1>
-
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ application.id }}</td>
-            </tr>
-            <tr>
-                <th>Quantity</th>
-                <td>{{ application.quantity }}</td>
-            </tr>
-            <tr>
-                <th>Price</th>
-                <td>{{ application.price }}</td>
-            </tr>
-            <tr>
-                <th>Action</th>
-                <td>{{ application.action.value }}</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_application_index') }}">back to list</a>
-
-    <a href="{{ path('app_application_edit', {'id': application.id}) }}">edit</a>
-
-    {{ include('application/_delete_form.html.twig') }}
+    <div class="container" style="max-width: 500px; margin: 40px auto;">
+        <h2 style="text-align:center; margin-bottom: 24px;">Информация о заявке</h2>
+        <div style="margin-bottom: 18px;">
+            <strong>ID:</strong> {{ application.id }}<br>
+            <strong>Количество:</strong> {{ application.quantity }}<br>
+            <strong>Цена:</strong> {{ application.price }}<br>
+            <strong>Действие:</strong> {{ application.action.value }}<br>
+            <strong>Портфель:</strong> {{ application.portfolio.id }}<br>
+            <strong>Акция:</strong> {{ application.stock.name }}<br>
+        </div>
+        <div style="display: flex; gap: 12px; justify-content: center; align-items: center;">
+            <a href="{{ path('app_application_index') }}" class="btn" style="min-width: 140px;">Назад к списку</a>
+            <a href="{{ path('app_application_edit', {'id': application.id}) }}" class="btn" style="min-width: 140px;">Редактировать</a>
+            <div style="margin: 0; padding: 0;">{{ include('application/_delete_form.html.twig') }}</div>
+        </div>
+    </div>
 {% endblock %}

@@ -3,8 +3,8 @@
 {% block title %}Application index{% endblock %}
 
 {% block body %}
-    <h1>My applications</h1>
-
+<div class="container">
+    <h1 style="margin-bottom: 24px;">Мои заявки</h1>
     <table class="table">
         <thead>
             <tr>
@@ -12,7 +12,7 @@
                 <th>Quantity</th>
                 <th>Price</th>
                 <th>Action</th>
-                <th>actions</th>
+                <th>Действия</th>
             </tr>
         </thead>
         <tbody>
@@ -23,17 +23,17 @@
                 <td>{{ application.price }}</td>
                 <td>{{ application.action.value }}</td>
                 <td>
-                    <a href="{{ path('app_application_show', {'id': application.id}) }}">show</a>
-                    <a href="{{ path('app_application_edit', {'id': application.id}) }}">edit</a>
+                    <a href="{{ path('app_application_show', {'id': application.id}) }}" class="btn">Показать</a>
+                    <a href="{{ path('app_application_edit', {'id': application.id}) }}" class="btn">Редактировать</a>
                 </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="5">no records found</td>
+                <td colspan="5">Нет заявок</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
-
-    <a href="{{ path('app_application_new') }}">Create new</a>
+    <a href="{{ path('app_application_new') }}" class="btn">Создать новую</a>
+</div>
 {% endblock %}
