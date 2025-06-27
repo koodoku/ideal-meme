@@ -30,30 +30,30 @@ class ApplicationRepositoryTest extends KernelTestCase
     private ApplicationRepository $applicationRepository;
     protected function setUp(): void
     {
-        $kernel = self::bootKernel();
+        $kernel = self::bootKernel();//во время теста
 
         $this->assertSame('test', $kernel->getEnvironment());
         $em = $kernel->getContainer()->get('doctrine.orm.entity_manager');
         $this->assertInstanceOf(EntityManager::class, $em);
 
-        $loader = new Loader();
+        $loader = new Loader(); //загружать тестовые данные в тестовую бд
         $loader->addFixture($this->stockFixture = new StockFixture());
         $loader->addFixture($this->userFixture = new UserFixture());
         $loader->addFixture($this->portfolioFixture = new PortfolioFixture());
         $loader->addFixture($this->applicationFixture = new ApplicationFixture());
 
-        $this->executor = new ORMExecutor($em, new ORMPurger());
+        $this->executor = new ORMExecutor($em, new ORMPurger());//****
         $this->executor->execute($loader->getFixtures());
 
-        $this->applicationRepository = $em->getRepository(Application::class);
+        $this->applicationRepository = $em->getRepository(Application::class);//***
     }
 
     protected function tearDown(): void
     {
-        $this->executor->getPurger()->purge();
+        $this->executor->getPurger()->purge();//очистка бд, чтобы каждые тесты работали с бд,
     }
 
-    public function testFindAppropriate(): void
+    public function testFindAppropriate(): void //поиск подходящей заявки
     {
         $application = $this->getAppropriateApplication();
 
@@ -65,7 +65,7 @@ class ApplicationRepositoryTest extends KernelTestCase
         );
     }
 
-    public function testFindAppropriateDifferentPrice(): void
+    public function testFindAppropriateDifferentPrice(): void //заявка с другой ценной чтобы заявка не нашлась. нашла=ошибка тк ее нет
     {
         $application = $this->getAppropriateApplication();
         $application->setPrice(2);
@@ -110,7 +110,7 @@ class ApplicationRepositoryTest extends KernelTestCase
         $this->assertNull($nonAppropriateApplication);
     }
 
-    public function testFindAllByUser(): void
+    public function testFindAllByUser(): void//остаем админа по ключу аисер админ
     {
         $userAdmin = $this->userFixture->getReference(UserFixture::USER_ADMIN_REFERENCE, User::class);
         $applications = $this->applicationRepository->findAllByUser($userAdmin);
@@ -133,4 +133,4 @@ class ApplicationRepositoryTest extends KernelTestCase
 
         return $application;
     }
-}
+}//дописать

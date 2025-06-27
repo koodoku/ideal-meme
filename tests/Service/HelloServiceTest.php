@@ -26,23 +26,24 @@ class HelloServiceTest extends TestCase
      * @dataProvider provideLuckyNumbers
      */
     public function testGenerateLuckyNumber(string $expectedLuckyNumber): void
+
     {// Arrange (Подготовка)
-        $helloObject = $this->createMock(Hello::class);//мок
+        $helloObject = $this->createMock(Hello::class);
         $helloObject
             ->expects($this->once())
-            ->method('getLuckyNumber') //Метод getLuckyNumber() мока Hello настраивается, чтобы вернуть ожидаемое число
+            ->method('getLuckyNumber')
             ->willReturn($expectedLuckyNumber)
         ;
 
         $this->helloRepository//мок репозитория
             ->expects($this->once())
             ->method('createLuckyNumber')
-            ->willReturn($helloObject)//Этот мок говорит: если сервис вызовет createLuckyNumber(), верни заранее подготовленный Hello с нужным lucky number.
+            ->willReturn($helloObject)
         ;
         // Act (Действие)
-        $actualLuckyNumber = $this->helloService->generateLuckyNumber();//Здесь выполняется одно конкретное действие — вызов метода generateLuckyNumber() у сервиса.
+        $actualLuckyNumber = $this->helloService->generateLuckyNumber();
 
-        //Assert (Проверка) //Проверяется, что результат вызова generateLuckyNumber() совпадает с ожидаемым значением.
+        //Assert (Проверка)
         $this->assertEquals(
             $expectedLuckyNumber,
             $actualLuckyNumber
@@ -58,3 +59,18 @@ class HelloServiceTest extends TestCase
         ];
     }
 }
+
+//public function testSumOfTwoNumbers()
+//{
+//    // Arrange (Подготовка)
+//    $calculator = new Calculator();
+//    $firstNumber = 3;
+//    $secondNumber = 4;
+//    $expectedResult = 7;
+//
+//    // Act (Действие)
+//    $actualResult = $calculator->sum($firstNumber, $secondNumber);
+//
+//    // Assert (Проверка)
+//    $this->assertEquals($expectedResult, $actualResult);
+//}

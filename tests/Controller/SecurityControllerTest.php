@@ -2,16 +2,17 @@
 
 namespace App\Tests\Controller;
 
+
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class SecurityControllerTest extends WebTestCase
 {
     private $client;
-
     protected function setUp(): void
     {
+
         $this->client = static::createClient();
-        // Можно добавить загрузку фикстур и логин, если нужно для защищённых страниц
+
     }
 
     public function testLoginPageLoadsSuccessfully(): void
@@ -27,7 +28,9 @@ class SecurityControllerTest extends WebTestCase
 
     public function testLoginWithInvalidCredentialsShowsError(): void
     {
+
         $crawler = $this->client->request('GET', '/login');
+
         $form = $crawler->selectButton('Sign in')->form([
             '_username' => 'wronguser',
             '_password' => 'wrongpassword',
@@ -35,19 +38,15 @@ class SecurityControllerTest extends WebTestCase
 
         $this->client->submit($form);
 
-        // Проверяем, что произошёл редирект (302) обратно на /login
         $this->assertResponseStatusCodeSame(302);
         $this->assertResponseRedirects('/login');
 
-        // Переходим по редиректу, чтобы получить страницу с ошибкой
         $crawler = $this->client->followRedirect();
 
         $this->assertResponseIsSuccessful();
 
-        // Проверяем, что на странице есть сообщение об ошибке (корректно укажите селектор)
         $this->assertSelectorTextContains('.alert-danger, .error', 'Invalid credentials');
     }
-
 
     public function testLogoutRedirects(): void
     {

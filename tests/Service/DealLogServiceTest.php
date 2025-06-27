@@ -15,61 +15,57 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Doctrine\Common\Collections\ArrayCollection;
 
-
 class DealLogServiceTest extends TestCase
 {
-    private DealLogRepository|MockObject $dealLogRepository;//Объявляется приватное свойство $dealLogRepository, которое будет использоваться как мок-объект (заглушка) для DealLogRepository
-    private DealLogService $dealLogService;//Приватное свойство, которое содержит тестируемый сервис DealLogService
+    private DealLogRepository|MockObject $dealLogRepository;
+    private DealLogService $dealLogService;
 
-    protected function setUp(): void//Метод setUp() вызывается перед каждым тестом. Здесь инициализируются необходимые объекты.
+    protected function setUp(): void
     {
-        $this->dealLogRepository = $this->createMock(DealLogRepository::class);//Создаётся мок-объект для DealLogRepository, чтобы можно было контролировать его поведение и изолировать тест от настоящей базы данных.
-        $this->dealLogService = new DealLogService($this->dealLogRepository);//Создаётся экземпляр тестируемого сервиса, которому передаётся мок-репозиторий.
+        $this->dealLogRepository = $this->createMock(DealLogRepository::class);
+        $this->dealLogService = new DealLogService($this->dealLogRepository);
     }
 
     /**
      * @dataProvider provideDealLogService
      */
-    public function testRegisterDealLog(//Объявление самого теста. Принимает параметры price и quantity, которые будут подставлены из дата-провайдера.
+    public function testRegisterDealLog(
         float $price,
         int $quantity
+
     ): void {
-        // Arrange
-        $buyApplication = $this->createMock(Application::class);//Создаются заглушки для объектов заявки на покупку и продажу
+
+        $buyApplication = $this->createMock(Application::class);
         $sellApplication = $this->createMock(Application::class);
 
-        $stock = $this->createMock(Stock::class);//Моки для сущностей: акция, портфели покупателя и продавца.
+        $stock = $this->createMock(Stock::class);
         $buyPortfolio = $this->createMock(Portfolio::class);
         $sellPortfolio = $this->createMock(Portfolio::class);
 
-        $buyApplication->method('getAction')->willReturn(ActionEnum::BUY);//Мок настроен так, чтобы при вызове getAction() возвращалось значение BUY
-        $buyApplication->method('getStock')->willReturn($stock);//Возвращает объект акции при вызове getStock()
-        $buyApplication->method('getPrice')->willReturn($price);//Возвращает переданную цену при вызове getPrice()
-        $buyApplication->method('getPortfolio')->willReturn($buyPortfolio);//Возвращает объект портфеля покупателя.
-        $buyApplication->method('getQuantity')->willReturn($quantity);//Возвращает количество при вызове getQuantity()
+        $buyApplication->method('getAction')->willReturn(ActionEnum::BUY);
+        $buyApplication->method('getStock')->willReturn($stock);
+        $buyApplication->method('getPrice')->willReturn($price);
+        $buyApplication->method('getPortfolio')->willReturn($buyPortfolio);
+        $buyApplication->method('getQuantity')->willReturn($quantity);
+        $sellApplication->method('getPortfolio')->willReturn($sellPortfolio);
 
-        $sellApplication->method('getPortfolio')->willReturn($sellPortfolio);//Возвращает объект портфеля продавца
-
-        // Ожидаем, что репозиторий получит вызов с объектом DealLog
         $this->dealLogRepository
-            ->expects($this->once())//// ожидаем, что метод будет вызван один раз
-            ->method('saveDealLog')//// имя метода, который должен быть вызван
-            ->with($this->isInstanceOf(DealLog::class));//// проверка, что аргументом будет объект класса DealLog
-        /// //Устанавливается ожидание, что метод saveDealLog() будет вызван ровно один раз с объектом DealLog как параметром.
+            ->expects($this->once())
+            ->method('saveDealLog')
+            ->with($this->isInstanceOf(DealLog::class));
 
-        // Act
-        $dealLog = $this->dealLogService->registerDealLog($buyApplication, $sellApplication);//вызывается метод registerDealLog() у сервиса DealLogService с моками заявок на покупку и продажу. Возвращается созданный объект DealLog.
 
-        // Assert
-        $this->assertInstanceOf(DealLog::class, $dealLog); //Проверяет, что объект — экземпляр класса,Убеждаемся, что метод действительно вернул объект класса DealLog.
-        $this->assertSame($stock, $dealLog->getStock());// Проверяет, что акции совпадают и ссылаются на один и тот же объект(Проверка, что свойство stock в dealLog ссылается на тот же самый объект, что и $stock)
-        $this->assertSame($buyPortfolio, $dealLog->getBuyPortfolio());//// Проверка, что портфель покупателя совпадает
+        $dealLog = $this->dealLogService->registerDealLog($buyApplication, $sellApplication);
+
+        $this->assertInstanceOf(DealLog::class, $dealLog);
+        $this->assertSame($stock, $dealLog->getStock());
+        $this->assertSame($buyPortfolio, $dealLog->getBuyPortfolio());
         $this->assertSame($sellPortfolio, $dealLog->getSellPortfolio());
-        $this->assertEquals($price, $dealLog->getPrice());//Значения сравниваются по содержимому, а не по ссылке — важно при сравнении чисел с плавающей точкой.
-        $this->assertEquals($quantity, $dealLog->getQuantity());//проверка, что количество совпадает с переданным в параметрах.
+        $this->assertEquals($price, $dealLog->getPrice());
+        $this->assertEquals($quantity, $dealLog->getQuantity());
 
-        //этот юнит-тест проверяет правильность создания объекта DealLog сервисом DealLogService, а также что репозиторий вызывается с нужными параметрами. Используются моки (createMock) для полной изоляции тестируемой логики.
     }
+
     /**
      * @dataProvider provideDeltaCases
      */
@@ -129,7 +125,7 @@ class DealLogServiceTest extends TestCase
         ];
     }
 
-    public static function provideDeltaCases(): array//Это data provider для теста testRegisterDealLog. Он позволяет запускать тест несколько раз с разными входными значениями.
+    public static function provideDeltaCases(): array
     {
         return [
             'standard case' => [
@@ -138,7 +134,7 @@ class DealLogServiceTest extends TestCase
                 'sellPrice' => 110.0,
                 'sellQuantity' => 2,
                 'latestPrice' => 120.0,
-                'expectedAbsolute' => 80.0,      // actualSum - investSum = 360 - 280
+                'expectedAbsolute' => 80.0,
             ],
             'no sales yet' => [
                 'buyPrice' => 50.0,
@@ -146,7 +142,7 @@ class DealLogServiceTest extends TestCase
                 'sellPrice' => 0.0,
                 'sellQuantity' => 0,
                 'latestPrice' => 60.0,
-                'expectedAbsolute' => 100.0,     // (10 * 60) - (10 * 50)
+                'expectedAbsolute' => 100.0,
             ],
             'loss case' => [
                 'buyPrice' => 200.0,
@@ -154,7 +150,7 @@ class DealLogServiceTest extends TestCase
                 'sellPrice' => 0.0,
                 'sellQuantity' => 0,
                 'latestPrice' => 150.0,
-                'expectedAbsolute' => -150.0,    // (3 * 150) - (3 * 200)
+                'expectedAbsolute' => -150.0,
             ]
         ];
     }

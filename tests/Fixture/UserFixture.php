@@ -6,40 +6,38 @@ use App\Entity\User;
 use Doctrine\Common\DataFixtures\AbstractFixture;
 use Doctrine\Persistence\ObjectManager;
 
-class UserFixture extends AbstractFixture // Класс фикстуры для создания тестовых пользователей, наследуется от AbstractFixture
+class UserFixture extends AbstractFixture
 {
-    public const USER_ADMIN_REFERENCE = 'user-admin'; // Константа для ссылки на администратора
-    public const USER_USER_REFERENCE = 'user-user';   // Константа для ссылки на обычного пользователя
+    public const USER_ADMIN_REFERENCE = 'user-admin';
+    public const USER_USER_REFERENCE = 'user-user';
 
-    public function load(ObjectManager $manager): void // Метод загрузки данных фикстуры в базу
+    public function load(ObjectManager $manager): void
     {
-        $userAdmin = new User(); // Создаем новый объект пользователя - администратора
-        $userAdmin->setUsername('admin'); // Устанавливаем имя пользователя
+        $userAdmin = new User();
+        $userAdmin->setUsername('admin');
 
-        // Хешируем пароль с помощью встроенной функции password_hash с алгоритмом BCRYPT
-        // PASSWORD_BCRYPT — это константа PHP, задающая алгоритм bcrypt для безопасного хеширования пароля
+
         $hashedPassword = password_hash('admin_password', PASSWORD_BCRYPT);
 
-        $userAdmin->setPassword($hashedPassword); // Устанавливаем хешированный пароль
-        // +0.5 балла за использование PasswordHasher — комментарий, отмечающий хороший подход безопасности
+        $userAdmin->setPassword($hashedPassword);
 
-        $userAdmin->setRoles(['ROLE_ADMIN']); // Назначаем пользователю роль администратора
+        $userAdmin->setRoles(['ROLE_ADMIN']);
 
-        $manager->persist($userAdmin); // Готовим объект к сохранению в базу (не сохраняем пока)
+        $manager->persist($userAdmin);
 
-        $this->addReference(self::USER_ADMIN_REFERENCE, $userAdmin); // Добавляем ссылку на этого пользователя, чтобы можно было получить его из других фикстур или тестов
+        $this->addReference(self::USER_ADMIN_REFERENCE, $userAdmin);
 
-        $user = new User(); // Создаем обычного пользователя
-        $user->setUsername('user'); // Устанавливаем имя пользователя
+        $user = new User();
+        $user->setUsername('user');
 
-        $hashedPassword = password_hash('user_password', PASSWORD_BCRYPT); // Хешируем пароль пользователя
-        $user->setPassword($hashedPassword); // Устанавливаем пароль
+        $hashedPassword = password_hash('user_password', PASSWORD_BCRYPT);
+        $user->setPassword($hashedPassword);
 
-        $manager->persist($user); // Готовим объект пользователя к сохранению
+        $manager->persist($user);
 
-        $manager->flush(); // Сохраняем все подготовленные объекты (админа и пользователя) в базу
+        $manager->flush();
 
-        $this->addReference(self::USER_USER_REFERENCE, $user); // Добавляем ссылку на обычного пользователя для доступа в тестах
+        $this->addReference(self::USER_USER_REFERENCE, $user);
     }
 }
 

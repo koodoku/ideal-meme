@@ -48,11 +48,9 @@ class DealService
 
         $sellPortfolio = $sellApplication
             ->getPortfolio()
-            //->addBalance($sellApplication->getTotal())
-            //->subDepositaryQuantityByStock($sellApplication->getStock(), $sellApplication->getQuantity())
+
         ;
 
-        // Костыли(
         $sellPortfolio->addBalance($sellApplication->getTotal());
         $sellDepositary = $sellPortfolio->getDepositaryByStock($sellApplication->getStock());
         $sellDepositary
@@ -63,7 +61,6 @@ class DealService
         if ($sellDepositary->getQuantity() === 0) {
             $this->depositaryRepository->removeDepositary($sellDepositary);
         }
-        // Конец костылей
 
         $this->applicationRepository->saveChanges();
     }

@@ -16,17 +16,21 @@ use PHPUnit\Framework\TestCase;
 
 class DealServiceTest extends TestCase
 {
+
     private ApplicationRepository|MockObject $applicationRepository;
     private DepositaryRepository|MockObject $depositaryRepository;
     private DealLogService|MockObject $dealLogService;
 
     private DealService $dealService;
 
+
     protected function setUp(): void
     {
+
         $this->applicationRepository = $this->createMock(ApplicationRepository::class);
         $this->depositaryRepository = $this->createMock(DepositaryRepository::class);
         $this->dealLogService = $this->createMock(DealLogService::class);
+
 
         $this->dealService = new DealService(
             $this->applicationRepository,
@@ -48,6 +52,7 @@ class DealServiceTest extends TestCase
             ->willReturn($appropriateApplication)
         ;
 
+
         if ($appropriateApplication === null) {
             $this->depositaryRepository->expects($this->never())
                 ->method('removeDepositary')
@@ -62,10 +67,10 @@ class DealServiceTest extends TestCase
             ;
 
             $this->applicationRepository->expects($this->never())
-                ->method('removeApplication')
-                ->withConsecutive([$originalApplication], [$appropriateApplication])
-            ;
+                ->method('removeApplication');
         } else {
+
+
             $this->applicationRepository->expects($this->once())
                 ->method('saveChanges')
             ;
@@ -75,10 +80,15 @@ class DealServiceTest extends TestCase
                 ->with($originalApplication, $appropriateApplication)
             ;
 
+            $expectedArgs = [[$originalApplication], [$appropriateApplication]];
+            $callIndex = 0;
             $this->applicationRepository->expects($this->exactly(2))
                 ->method('removeApplication')
-                ->withConsecutive([$originalApplication], [$appropriateApplication])
-            ;
+                ->willReturnCallback(function() use (&$callIndex, $expectedArgs) {
+                    \PHPUnit\Framework\TestCase::assertEquals($expectedArgs[$callIndex], func_get_args(), "removeApplication called with unexpected arguments at call $callIndex");
+                    $callIndex++;
+                    return null;
+                });
         }
 
         $this->dealService->executeDeal($originalApplication);
@@ -87,14 +97,17 @@ class DealServiceTest extends TestCase
     public function provideApplications(): array
     {
         return [
+
             'Не получили подходящей заявки' => [
                 (new Application()),
                 null
             ],
+
             'Заявка на покупку и нашли заявку на продажу' => [
                 self::configureBuyApplication(20, 5),
                 self::configureSellApplication(20, 5),
             ],
+
             'Заявка на продажу и нашли заявку на покупку' => [
                 self::configureSellApplication(20, 5),
                 self::configureBuyApplication(20, 5),
@@ -102,9 +115,11 @@ class DealServiceTest extends TestCase
         ];
     }
 
+
     private function configureBuyApplication(float $price, int $quantity): Application|MockObject
     {
         $buyApplication = self::createMock(Application::class);
+
 
         $buyApplication
             ->expects($this->once())
@@ -112,11 +127,13 @@ class DealServiceTest extends TestCase
             ->willReturn(ActionEnum::BUY)
         ;
 
+
         $buyApplication
             ->expects($this->once())
             ->method('getPortfolio')
             ->willReturn($portfolio = self::createMock(Portfolio::class))
         ;
+
 
         $buyApplication
             ->expects($this->exactly(2))
@@ -124,11 +141,13 @@ class DealServiceTest extends TestCase
             ->willReturn($price * $quantity)
         ;
 
+
         $buyApplication
             ->expects($this->once())
             ->method('getStock')
             ->willReturn($stock = $this->createMock(Stock::class))
         ;
+
 
         $buyApplication
             ->expects($this->once())
@@ -136,15 +155,18 @@ class DealServiceTest extends TestCase
             ->willReturn($quantity)
         ;
 
+
         $portfolio->expects($this->once())
             ->method('subBalance')
             ->with($price * $quantity)
         ;
 
+
         $portfolio->expects($this->once())
             ->method('subFreezeBalance')
             ->with($price * $quantity)
         ;
+
 
         $portfolio->expects($this->once())
             ->method('addDepositaryQuantityByStock')
@@ -154,9 +176,11 @@ class DealServiceTest extends TestCase
         return $buyApplication;
     }
 
+
     private function configureSellApplication(float $price, int $quantity): Application|MockObject
     {
         $sellApplication = self::createMock(Application::class);
+
 
         $sellApplication
             ->expects($this->atMost(1))
@@ -164,11 +188,13 @@ class DealServiceTest extends TestCase
             ->willReturn(ActionEnum::SELL)
         ;
 
+
         $sellApplication
             ->expects($this->once())
             ->method('getPortfolio')
             ->willReturn($portfolio = self::createMock(Portfolio::class))
         ;
+
 
         $sellApplication
             ->expects($this->once())
@@ -176,22 +202,26 @@ class DealServiceTest extends TestCase
             ->willReturn($price * $quantity)
         ;
 
+
         $sellApplication
             ->expects($this->once())
             ->method('getStock')
             ->willReturn($stock = $this->createMock(Stock::class))
         ;
 
+
         $sellApplication
-            ->expects($this->exactly(2))
-            ->method('getQuantity')
+                ->expects($this->exactly(2))
+                ->method('getQuantity')
             ->willReturn($quantity)
         ;
+
 
         $portfolio->expects($this->once())
             ->method('addBalance')
             ->with($price * $quantity)
         ;
+
 
         $portfolio->expects($this->once())
             ->method('getDepositaryByStock')
@@ -199,10 +229,12 @@ class DealServiceTest extends TestCase
             ->willReturn($depositary = self::createMock(Depositary::class))
         ;
 
+
         $depositary->expects($this->once())
             ->method('subQuantity')
             ->with($quantity)
         ;
+
 
         $depositary->expects($this->once())
             ->method('subFreezeQuantity')

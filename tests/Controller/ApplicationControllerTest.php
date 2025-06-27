@@ -33,7 +33,7 @@ class ApplicationControllerTest extends WebTestCase
 
         $loader = new Loader();
         $loader->addFixture(new AppFixtures());
-        $loader ->addFixture(new ApplicationFixture());
+        $loader->addFixture(new ApplicationFixture());
         $loader->addFixture(new UserFixture());
         $loader->addFixture(new StockFixture());
         $loader->addFixture(new PortfolioFixture());
@@ -72,39 +72,4 @@ class ApplicationControllerTest extends WebTestCase
         $this->assertResponseIsSuccessful();
         $this->assertSelectorTextContains('h1', $stock->getName());
     }
-
-//    public function testNew(): void
-// {
-//     $crawler = $this->client->request('GET', '/application/new');
-
-//     $this->assertResponseIsSuccessful();
-//     $this->assertSelectorExists('form');
-//     $application = $this ->executor->getReferenceRepository()->getReference(ApplicationFixture::ADMIN_APPLICATION_REFERENCE);
-//     $formData = [
-//         'application' => [
-//             'price' => 123.45,
-//             'quantity' => 1 ,
-//             'action' => $application -> getAction() -> value,
-//             'portfolio' =>$application -> getPortfolio() ->getId(),
-//             'stock' => $application -> getStock() -> getId(),
-//         ],
-//     ];
-
-
-//     $this->client->submitForm('Save', $formData);
-
-//     $this->assertResponseRedirects('/application');
-
-//     $this->client->followRedirect();
-//     $this->assertResponseIsSuccessful();
-
-//     /** @var Application|null $application */
-//     $application = $this->em->getRepository(Application::class)->findOneBy([
-//         'price' => 123.45,
-//         'quantity' => 1,
-//     ]);
-//     $this->assertNotNull($application, 'Application was saved in the database');
-// }
-
-
 }

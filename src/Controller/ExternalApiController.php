@@ -13,8 +13,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Psr\Cache\CacheItemPoolInterface;
 
-class ExternalApiController extends AbstractController//Делает запрос к внешнему API ЦБ РФ,олучает данные о депозитах.
-//Кеширует их на 24 часа, чтобы не запрашивать повторно при каждом обращении.Отображает данные через Twig-шаблон external/deposit.html.twig
+class ExternalApiController extends AbstractController
+
 {
     private HttpClientInterface $client;
     private CacheItemPoolInterface $cache;
@@ -28,19 +28,18 @@ class ExternalApiController extends AbstractController//Делает запро�
     }
 
     #[Route('/external/deposit', name: 'app_external_deposit')]
-    public function deposit(): Response// метод депозит создает обект кеша (ниже строка)
+    public function deposit(): Response
     {
         $cacheItem = $this->cache->getItem('max_datetime_deposits');
         if (!$cacheItem->isHit()) {
-            $currentDate = new \DateTime();//формирует url запроса,Отправляется GET-запрос на API ЦБ РФ , Передаются параметры:y1 и y2 — текущий год (для фильтрации данных за этот год).
-            //publicationId, datasetId, measureId — фиксированные параметры, нужные для получения нужного набора данных (ставки по депозитам)
+            $currentDate = new \DateTime();
             $response = $this->client->request(
                 'GET',
                 "https://www.cbr.ru/dataservice/data?y1={$currentDate->format('Y')}&y2={$currentDate->format('Y')}&publicationId=18&datasetId=37&measureId=2"
             );
             $data = $response->toArray();
             $rawData = $data['RawData'];
-            $maxDateTime = new \DateTime('@0');//// начальная дата: 1970-01-01
+            $maxDateTime = new \DateTime('@0');
             foreach ($rawData as $item) {
                 $date = new \DateTime($item['date']);
                 if ($maxDateTime < $date) {
@@ -50,8 +49,7 @@ class ExternalApiController extends AbstractController//Делает запро�
             $maxDateTimeData = array_filter($rawData, function ($item) use ($maxDateTime) {
                 return $item['date'] === $maxDateTime->format('Y-m-d\\TH:i:s');
             });
-            $deposits = [];//Преобразование данных в объекты Deposit,Создаём массив объектов Deposit.Каждый Deposit получает
-            //Сырые данные ($data) о ставке.Заголовки (headerData) с описаниями.
+            $deposits = []; /////
             foreach ($maxDateTimeData as $dataRow) {
                 $deposits[] = new Deposit($dataRow, $data['headerData']);
             }
@@ -61,10 +59,8 @@ class ExternalApiController extends AbstractController//Делает запро�
         } else {
             $deposits = $cacheItem->get();
         }
-        return $this->render('external/deposit.html.twig', [// рендерим шаблон, передаем данные в шаблон
+        return $this->render('external/deposit.html.twig', [
             'deposits' => $deposits,
         ]);
     }
 }
-//Этот код реализует контроллер Symfony, который обращается к стороннему API (ЦБ РФ) за данными по депозитным
-// ставкам и кеширует результат, чтобы не перегружать API и ускорить ответ пользователю

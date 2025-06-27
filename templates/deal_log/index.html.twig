@@ -1,23 +1,67 @@
-{% extends 'base.html.twig' %}
-
-{% block title %}Deal Logs for Stock {{ stock.name }}{% endblock %}
-
 {% block body %}
+    <div style="margin: 1em 0;">
+        <button onclick="showDayPicker()" class="btn btn-primary">День</button>
+        <input type="date" id="dayPicker" style="display:none; margin-left:10px;" onchange="setTimeframe('day')">
+        <button onclick="setTimeframe('week')" class="btn btn-secondary">Неделя</button>
+        <button onclick="setTimeframe('month')" class="btn btn-success">Месяц</button>
+        <button onclick="setTimeframe('all')" class="btn btn-outline-dark">Всё время</button>
+    </div>
     <div>
         <canvas id="myChart"></canvas>
     </div>
 {% endblock %}
+
 {% block javascripts %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{{ asset('javascript/mychart.js') }}"></script>
+    <script src="{{ asset('myChart.js') }}"></script>
     <script>
-        const ctx = document.getElementById('myChart');
+        window.originalLabels = {{ deal_logs|map(dl => dl.timestamp|date("Y-m-d H:i:s"))|json_encode|raw }};
+        window.originalData = {{ deal_logs|map(dl => dl.price)|json_encode }};
+        window.chartInstance = null;
+        const ctx = document.getElementById('myChart').getContext('2d');
+        renderChart(ctx, window.originalLabels, window.originalData, 'Stock price changes');
+        window.chartCtx = ctx;
 
-        renderChart(
-            ctx,
-            {{ deal_logs|map(dl => dl.timestamp|date("d-m-Y H:i:s"))|json_encode|raw }},
-            {{ deal_logs|map(dl => dl.price)|json_encode }},
-            'Stock price changes'
-        );
+        function showDayPicker() {
+            document.getElementById('dayPicker').style.display = 'inline-block';
+        }
+
+        function setTimeframe(range) {
+            const now = new Date();
+            const filteredLabels = [];
+            const filteredData = [];
+
+            if (range === "day") {
+                const dayPicker = document.getElementById('dayPicker');
+                const selectedDate = dayPicker.value;
+                if (!selectedDate) {
+                    alert('Выберите дату!');
+                    return;
+                }
+                for (let i = 0; i < window.originalLabels.length; i++) {
+                    // Приводим к формату YYYY-MM-DD
+                    const labelDate = window.originalLabels[i].slice(0, 10);
+                    if (labelDate === selectedDate) {
+                        filteredLabels.push(window.originalLabels[i]);
+                        filteredData.push(window.originalData[i]);
+                    }
+                }
+            } else {
+                for (let i = 0; i < window.originalLabels.length; i++) {
+                    const date = new Date(window.originalLabels[i]);
+                    const diff = (now - date) / (1000 * 60 * 60 * 24);
+                    if (
+                        (range === "week" && diff <= 7) ||
+                        (range === "month" && diff <= 30) ||
+                        range === "all"
+                    ) {
+                        filteredLabels.push(window.originalLabels[i]);
+                        filteredData.push(window.originalData[i]);
+                    }
+                }
+            }
+
+            renderChart(window.chartCtx, filteredLabels, filteredData, 'Stock price changes');
+        }
     </script>
 {% endblock %}

@@ -4,8 +4,10 @@ namespace App\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
+
 class HelloControllerTest extends WebTestCase
 {
+
     public function testRootRedirectsToLogin(): void
     {
         $client = static::createClient();
@@ -18,7 +20,10 @@ class HelloControllerTest extends WebTestCase
         $client = static::createClient();
         $client->request('GET', '/hello');
         $this->assertResponseIsSuccessful();
-        $this->assertStringContainsString('Hello World!', $client->getResponse()->getContent());
+        $this->assertStringContainsString(
+            'Hello World!',
+            $client->getResponse()->getContent()
+        );
     }
 
     /**
@@ -29,13 +34,15 @@ class HelloControllerTest extends WebTestCase
         $client = static::createClient();
         $client->request('GET', "/hello/$name");
         $this->assertResponseIsSuccessful();
-        $this->assertEquals("Hello $name", $client->getResponse()->getContent());
+        $this->assertEquals(
+            "Hello $name",
+            $client->getResponse()->getContent()
+        );
     }
 
     public function testLuckyNumber(): void
     {
         $client = static::createClient();
-        // Получаем lucky number через сервис (или подставляем невалидный)
         $client->request('GET', '/hello/lucky/999999');
         $this->assertResponseIsSuccessful();
         $this->assertEquals('Fail', $client->getResponse()->getContent());
@@ -43,11 +50,11 @@ class HelloControllerTest extends WebTestCase
 
     public static function provideHelloNames(): array
     {
-       return [
-           'Первое имя' => ['Иван'],
-           'Второе имя' => ['Петр'],
-           'Третья имя' => ['Steve'],
-           'Четвертое имя' => ['Abacaba'],
-       ];
+        return [
+            'Первое имя' => ['Иван'],
+            'Второе имя' => ['Петр'],
+            'Третья имя' => ['Steve'],
+            'Четвертое имя' => ['Abacaba'],
+        ];
     }
 }

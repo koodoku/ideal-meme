@@ -2,6 +2,7 @@
 
 namespace App\Tests\Controller;
 
+// Импорт нужных классов и фикстур
 use App\DataFixtures\AppFixtures;
 use App\Repository\UserRepository;
 use App\Tests\Fixture\ApplicationFixture;
@@ -15,6 +16,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
+
 class RegistrationControllerTest extends WebTestCase
 {
     private $client;
@@ -23,9 +25,11 @@ class RegistrationControllerTest extends WebTestCase
 
     protected function setUp(): void
     {
+
         $this->client = static::createClient();
 
         $this->em = $this->client->getContainer()->get('doctrine.orm.entity_manager');
+
 
         $loader = new Loader();
         $loader->addFixture(new AppFixtures());
@@ -44,29 +48,34 @@ class RegistrationControllerTest extends WebTestCase
 
     protected function tearDown(): void
     {
+
         $this->executor->getPurger()->purge();
         parent::tearDown();
     }
 
     public function testRegistrationPageLoadsSuccessfully(): void
     {
+
         $crawler = $this->client->request('GET', '/register');
 
+
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+
         $this->assertSelectorExists('form[name=registration_form]');
+
         $this->assertSelectorTextContains('button', 'Register');
     }
 
     public function testSuccessfulRegistration(): void
     {
+
         $crawler = $this->client->request('GET', '/register');
         $this->assertResponseIsSuccessful();
 
         $form = $crawler->selectButton('Register')->form();
-
         $form['registration_form[username]'] = 'newuser@example.com';
         $form['registration_form[plainPassword]'] = 'StrongPass123!';
-        $form['registration_form[agreeTerms]'] = true ;
+        $form['registration_form[agreeTerms]'] = true;
 
         $this->client->submit($form);
 
@@ -85,9 +94,11 @@ class RegistrationControllerTest extends WebTestCase
 
         $form['registration_form[username]'] = '';
         $form['registration_form[plainPassword]'] = '';
+
         $crawler = $this->client->submit($form);
 
         $this->assertResponseStatusCodeSame(422);
+
         $this->assertSelectorExists('.invalid-feedback');
     }
 }

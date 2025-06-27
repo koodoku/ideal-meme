@@ -1,7 +1,9 @@
 <?php
 
+// Пространство имён для тестов контроллеров
 namespace App\Tests\Controller;
 
+// Импорт необходимых сущностей, репозиториев, фикстур и компонентов Symfony
 use App\Entity\Portfolio;
 use App\Entity\User;
 use App\Repository\UserRepository;
@@ -23,12 +25,17 @@ class ProfileControllerTest extends WebTestCase
     public static function setUpBeforeClass(): void
     {
         self::$client = static::createClient();
+
         /** @var EntityManagerInterface $em */
         $em = self::$client->getContainer()->get('doctrine.orm.entity_manager');
+
         $loader = new Loader();
         $loader->addFixture(new UserFixture());
         $loader->addFixture(self::$portfolioFixture = new PortfolioFixture());
+
+
         self::$executor = new ORMExecutor($em, new ORMPurger());
+
         self::$executor->execute($loader->getFixtures());
     }
 
@@ -37,22 +44,36 @@ class ProfileControllerTest extends WebTestCase
         self::$executor->getPurger()->purge();
         parent::tearDownAfterClass();
     }
-
     public function testProfile(): void
     {
         /** @var UserRepository $userRepository */
         $userRepository = self::$client->getContainer()->get(UserRepository::class);
+
         /** @var User $userAdmin */
         $userAdmin = $userRepository->findOneBy(['username' => 'admin']);
         self::$client->loginUser($userAdmin);
+
         $crawler = self::$client->request('GET', '/profile');
         $this->assertResponseIsSuccessful();
+
         $this->assertCount(3, $crawler->filter('h1'));
         $this->assertPageTitleSame('User Profile');
+
         $this->assertAnySelectorTextSame('h1', "User name: {$userAdmin->getUsername()}");
+
+        // Проверка, что есть заголовок со списком портфелей
         $this->assertAnySelectorTextSame('h1', "All portfolios:");
-        $adminPortfolio = self::$portfolioFixture->getReference(PortfolioFixture::PORTFOLIO_ADMIN_REFERENCE, Portfolio::class);
-        $this->assertSelectorTextSame('span', "Portfolio {$adminPortfolio->getId()} has {$adminPortfolio->getBalance()} money and has stocks:");
+
+        $adminPortfolio = self::$portfolioFixture->getReference(
+            PortfolioFixture::PORTFOLIO_ADMIN_REFERENCE,
+            Portfolio::class
+        );
+
+        $this->assertSelectorTextSame(
+            'span',
+            "Portfolio {$adminPortfolio->getId()} has {$adminPortfolio->getBalance()} money and has stocks:"
+        );
+
         $this->assertAnySelectorTextContains('h1', "quantity");
     }
 

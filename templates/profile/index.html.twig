@@ -48,8 +48,8 @@
 </style>
 <div class="profile-container">
     {% set total = 0 %}
-    <div class="profile-title">User name: {{ user.username }}</div>
-    <div class="profile-title" style="font-size:1.2rem; font-weight:500; color:#222;">All portfolios:</div>
+    <h1 class="profile-title">User name: {{ user.username }}</h1>
+    <h1 class="profile-title" style="font-size:1.2rem; font-weight:500; color:#222;">All portfolios:</h1>
     {% for portfolio in user.portfolios %}
         <div class="profile-section">
             <span class="profile-portfolio">Portfolio {{ portfolio.id }} has {{ portfolio.balance }} money and has stocks:</span>
@@ -59,6 +59,6 @@
             {% endfor %}
         </div>
     {% endfor %}
-    <div class="profile-total">Total quantity: {{ total }}</div>
+    <h1 class="profile-title profile-total">Total quantity: {{ total }}</h1>
 </div>
 {% endblock %}
