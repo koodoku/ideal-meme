@@ -3,9 +3,18 @@
 {% block title %}New Application{% endblock %}
 
 {% block body %}
-    <h1>Create new Application</h1>
-
-    {{ include('application/_form.html.twig') }}
-
-    <a href="{{ path('app_application_index') }}">back to list</a>
+    <div class="container" style="max-width: 500px; margin: 40px auto;">
+        <h2 style="text-align:center; margin-bottom: 24px;">Создать заявку</h2>
+        {{ form_start(form) }}
+            {{ form_row(form.quantity) }}
+            {{ form_row(form.price) }}
+            {{ form_row(form.action) }}
+            {{ form_row(form.portfolio) }}
+            {{ form_row(form.stock) }}
+            <div style="display: flex; gap: 12px; justify-content: center; align-items: center; margin-top: 24px;">
+                <button class="btn" style="min-width: 140px;">Сохранить</button>
+                <a href="{{ path('app_application_index') }}" class="btn" style="min-width: 140px;">Назад к списку</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
 {% endblock %}

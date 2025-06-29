@@ -3,21 +3,62 @@
 {% block title %}User Profile{% endblock %}
 
 {% block body %}
-<div>
+<style>
+.profile-container {
+    max-width: 600px;
+    margin: 40px auto;
+    background: #f8fafc;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    padding: 32px 24px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+.profile-title {
+    color: #2563eb;
+    font-weight: bold;
+    font-size: 1.5rem;
+    margin-bottom: 18px;
+}
+.profile-section {
+    background: #fff;
+    border-radius: 8px;
+    margin-bottom: 18px;
+    padding: 18px 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    font-size: 1.1rem;
+    color: #222;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.profile-portfolio {
+    color: #475569;
+    margin-bottom: 6px;
+}
+.profile-stock {
+    color: #64748b;
+    font-size: 1rem;
+}
+.profile-total {
+    color: #2563eb;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-top: 18px;
+}
+</style>
+<div class="profile-container">
     {% set total = 0 %}
-    <h1>User name: {{ user.username }}</h1>
-    <h1>All portfolios: </h1>
+    <h1 class="profile-title">User name: {{ user.username }}</h1>
+    <h1 class="profile-title" style="font-size:1.2rem; font-weight:500; color:#222;">All portfolios:</h1>
     {% for portfolio in user.portfolios %}
-        <span>Portfolio {{ portfolio.id }} has {{ portfolio.balance }} money and has stocks:</span>
-        <br>
-        {% for depositary in portfolio.depositaries %}
-            {% set total = total + depositary.quantity %}
-            Stock name: {{ depositary.stock.name }}, quantity: {{ depositary.quantity }},
-            Delta: {{ delta(depositary) }}
-            <br>
-        {% endfor %}
-        <br>
+        <div class="profile-section">
+            <span class="profile-portfolio">Portfolio {{ portfolio.id }} has {{ portfolio.balance }} money and has stocks:</span>
+            {% for depositary in portfolio.depositaries %}
+                {% set total = total + depositary.quantity %}
+                <span class="profile-stock">Stock name: {{ depositary.stock.name }}, quantity: {{ depositary.quantity }}, Delta: {{ delta(depositary) }}</span>
+            {% endfor %}
+        </div>
     {% endfor %}
-    <h1> Total quantity: {{ total }}</h1>
+    <h1 class="profile-title profile-total">Total quantity: {{ total }}</h1>
 </div>
 {% endblock %}

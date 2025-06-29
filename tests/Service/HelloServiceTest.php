@@ -14,43 +14,63 @@ class HelloServiceTest extends TestCase
     private HelloService $helloService;
     protected function setUp(): void
     {
-        $this->helloRepository = $this->createMock(HelloRepository::class);// Создание мок-объекта репозитория HelloRepository для тестирования
-        //Mock-объект позволяет имитировать поведение реального объекта, что полезно для изоляции тестируемого кода от зависимостей.
+        $this->helloRepository = $this->createMock(HelloRepository::class);
+
         $this->helloService = new HelloService(
             $this->helloRepository
         );
     }
+
+
     /**
      * @dataProvider provideLuckyNumbers
      */
+    public function testGenerateLuckyNumber(string $expectedLuckyNumber): void
 
-    public function testGenerateLuckyNumber(string $expectedLuckyNumber):void
-    {
-        $expectedLuckyNumber = '1234';//метод expected возвращает строку 
-        $helloObject = $this->createMock(Hello::class); 
-        $helloObject //
+    {// Arrange (Подготовка)
+        $helloObject = $this->createMock(Hello::class);
+        $helloObject
             ->expects($this->once())
             ->method('getLuckyNumber')
             ->willReturn($expectedLuckyNumber)
         ;
-        $this->helloRepository //
-            ->expects($this->once()) 
+
+        $this->helloRepository//мок репозитория
+            ->expects($this->once())
             ->method('createLuckyNumber')
             ->willReturn($helloObject)
         ;
+        // Act (Действие)
+        $actualLuckyNumber = $this->helloService->generateLuckyNumber();
 
-
-        $this->assertEquals( // Проверка на то что соответствует ожидаемому значению
+        //Assert (Проверка)
+        $this->assertEquals(
             $expectedLuckyNumber,
-            $this->helloService->generateLuckyNumber()
+            $actualLuckyNumber
         );
     }
+
     public static function provideLuckyNumbers(): array
     {
         return [
-            'Один'=> ['1'],
-            'Два'=> ['2'],
-            'Три'=> ['3'],
+            'Один' => ['1'],
+            'Два' => ['2'],
+            'Три' => ['3']
         ];
     }
 }
+
+//public function testSumOfTwoNumbers()
+//{
+//    // Arrange (Подготовка)
+//    $calculator = new Calculator();
+//    $firstNumber = 3;
+//    $secondNumber = 4;
+//    $expectedResult = 7;
+//
+//    // Act (Действие)
+//    $actualResult = $calculator->sum($firstNumber, $secondNumber);
+//
+//    // Assert (Проверка)
+//    $this->assertEquals($expectedResult, $actualResult);
+//}

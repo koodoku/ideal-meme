@@ -15,28 +15,23 @@ class DealLogService
     ) {
     }
 
-    public function registerDealLog(Application $buyApplication, Application $sellApplication): DealLog// метод регестрирует запись о соверш сделке
+    public function registerDealLog(Application $buyApplication, Application $sellApplication): DealLog
     {
-        if ($buyApplication->getAction() === ActionEnum::SELL) {//Получает тип действия заявки (покупка или продажа).
-            //Проверяет, является ли заявка на покупку ($buyApplication) на самом деле заявкой на продажу.
+        if ($buyApplication->getAction() === ActionEnum::SELL) {
             return $this->registerDealLog($sellApplication, $buyApplication);
-            //сли это так, метод вызывает сам себя, поменяв местами заявки на покупку и продажу. Это нужно для того, чтобы всегда обрабатывать 
-            //заявку на покупку как $buyApplication, а заявку на продажу как $sellApplication
         }
 
-        $dealLog = (new DealLog())//создает вот объект деаллог
-            ->setStock($buyApplication->getStock())//устанавливает ценную бумагу по кот был соверш сделка (из заявки на покупку)
-            ->setPrice($buyApplication->getPrice()) // станавливает цену сделки
+        $dealLog = (new DealLog())
+            ->setStock($buyApplication->getStock())
+            ->setPrice($buyApplication->getPrice())
             ->setBuyPortfolio($buyApplication->getPortfolio())
             ->setSellPortfolio($sellApplication->getPortfolio())
-            ->setQuantity($buyApplication->getQuantity()) 
+            ->setQuantity($buyApplication->getQuantity())
         ;
 
-        $this->dealLogRepository->saveDealLog($dealLog);//Использует репозиторий DealLogRepository для сохранения записи о сделке в базе данных
+        $this->dealLogRepository->saveDealLog($dealLog);
 
-        return $dealLog;//Возвращает объект DealLog, который был сохранен.
-
-
+        return $dealLog;
     }
 
     public function calculateDelta(Depositary $depositary): float
