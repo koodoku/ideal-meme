@@ -27,7 +27,7 @@ class DealLogRepository extends ServiceEntityRepository
      * @param Stock $stock
      * @return array<DealLog>
      */
-    //************************
+
     public function findByStock(Stock $stock): array
     {
         return $this->createQueryBuilder('d')

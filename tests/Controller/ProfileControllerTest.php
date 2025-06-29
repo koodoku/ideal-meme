@@ -1,9 +1,7 @@
 <?php
 
-// Пространство имён для тестов контроллеров
 namespace App\Tests\Controller;
 
-// Импорт необходимых сущностей, репозиториев, фикстур и компонентов Symfony
 use App\Entity\Portfolio;
 use App\Entity\User;
 use App\Repository\UserRepository;

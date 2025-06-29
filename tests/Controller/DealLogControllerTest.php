@@ -58,16 +58,17 @@ class DealLogControllerTest extends WebTestCase
         $this->executor->getPurger()->purge();
     }
 
-    public function testDealLog(): void
+    public function testDealLog(): void//
     {
 
-        /** @var Stock $stock */
+        /** @var Stock $stock */ //переменная $stock будет объектом класса Stock.
         $stock = $this->em->getRepository(\App\Entity\Stock::class)->findOneBy(['name' => 'Test stock']);
 
         $this->client->request('GET', '/deal/log/' . $stock->getId());
 
         $this->assertResponseIsSuccessful();
 
-        $this->assertSelectorTextContains('', $stock->getName());
+        $this->assertSelectorTextContains('#stock-name', $stock->getName());//метод для проверки содержимого страницы. #stock-name позволяет точно указать, где искать текст.
     }
 }
+

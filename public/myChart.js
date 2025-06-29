@@ -12,7 +12,7 @@ function renderChart(ctx, x, y, label = '') {
         label: label,
         data: y,
         borderWidth: 2,
-        borderColor: 'rgba(33, 150, 243, 1)', // ярко-синий
+        borderColor: 'rgba(33, 150, 243, 1)',
         backgroundColor: 'rgba(33, 150, 243, 0.15)',
         pointBackgroundColor: 'rgba(255,255,255,1)',
         pointBorderColor: 'rgba(33, 150, 243, 1)',

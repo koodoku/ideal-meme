@@ -49,7 +49,7 @@ class ExternalApiController extends AbstractController
             $maxDateTimeData = array_filter($rawData, function ($item) use ($maxDateTime) {
                 return $item['date'] === $maxDateTime->format('Y-m-d\\TH:i:s');
             });
-            $deposits = []; /////
+            $deposits = [];
             foreach ($maxDateTimeData as $dataRow) {
                 $deposits[] = new Deposit($dataRow, $data['headerData']);
             }

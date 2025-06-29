@@ -31,45 +31,45 @@ class ApplicationControllerTest extends WebTestCase
 
         $this->em = $this->client->getContainer()->get('doctrine.orm.entity_manager');
 
-        $loader = new Loader();
-        $loader->addFixture(new AppFixtures());
-        $loader->addFixture(new ApplicationFixture());
-        $loader->addFixture(new UserFixture());
-        $loader->addFixture(new StockFixture());
-        $loader->addFixture(new PortfolioFixture());
+        $loader = new Loader();// Создаём загрузчик фикстур
+        $loader->addFixture(new AppFixtures()); // Общие данные приложения(ДЛЯ ЧЕГО?)
+        $loader->addFixture(new ApplicationFixture()); // Фикстуры заявок
+        $loader->addFixture(new UserFixture()); // Фикстуры пользователей
+        $loader->addFixture(new StockFixture()); // Фикстуры акций
+        $loader->addFixture(new PortfolioFixture()); // Фикстуры портфелей
 
-        $this->executor = new ORMExecutor($this->em, new ORMPurger());
-        $this->executor->execute($loader->getFixtures());
+        $this->executor = new ORMExecutor($this->em, new ORMPurger()); // Создаём исполнитель фикстур с очисткой базы перед загрузкой
+        $this->executor->execute($loader->getFixtures());  // Загружаем все добавленные фикстуры в тестовую БД
 
 
-        /** @var UserRepository $userRepository */
+        /** @var UserRepository $userRepository */ //// Получаем репозиторий пользователей
         $userRepository = $this->client->getContainer()->get(UserRepository::class);
-        /** @var User $userAdmin */
+        /** @var User $userAdmin */ // // Получаем пользователя с логином "admin" из БД
         $userAdmin = $userRepository->findOneBy(['username' => 'admin']);
 
-        $this->client->loginUser($userAdmin);
+        $this->client->loginUser($userAdmin); // Логиним пользователя в тестовом клиенте (имитация аутентификации)
     }
 
-    protected function tearDown(): void
+    protected function tearDown(): void // Метод, запускающийся после каждого теста(ЗАЧЕМ)
     {
-        parent::tearDown();
-        $this->executor->getPurger()->purge();
+        parent::tearDown();// Вызываем базовую реализацию(ЧТО ЗА БАЗОВАЯ РЕАЛИЗАЦИЯ)
+        $this->executor->getPurger()->purge(); // Очищаем БД, чтобы каждый тест был независим
     }
 
-    public function testIndex(): void
+    public function testIndex(): void //Тестирование главной страницы заявок (/application)
     {
-        $this->client->request('GET', '/application');
-        $this->assertResponseIsSuccessful();
-        $this->assertSelectorExists('table');
+        $this->client->request('GET', '/application'); // Отправляем GET-запрос на страницу заявок
+        $this->assertResponseIsSuccessful(); // Проверяем, что ответ успешен (HTTP 200)
+        $this->assertSelectorExists('table'); // Проверяем, что в HTML есть таблица(КАКАЯ ТАБЛИЦА)
     }
 
-    public function testGlass(): void
-    {
+    public function testGlass(): void // Тестирование страницы стакана заявок по конкретной акции
+    { // Получаем ссылку на фикстурную акцию
         /** @var Stock $stock */
         $stock = $this->executor->getReferenceRepository()->getReference(StockFixture::STOCK_TEST_REFERENCE);
 
-        $this->client->request('GET', '/application/glass/' . $stock->getId());
-        $this->assertResponseIsSuccessful();
-        $this->assertSelectorTextContains('h1', $stock->getName());
+        $this->client->request('GET', '/application/glass/' . $stock->getId());// Отправляем GET-запрос на страницу стакана для этой акции
+        $this->assertResponseIsSuccessful(); // Проверяем, что ответ успешен
+        $this->assertSelectorTextContains('h1', $stock->getName()); // Проверяем, что заголовок страницы содержит название акции
     }
 }

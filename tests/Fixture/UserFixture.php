@@ -19,7 +19,7 @@ class UserFixture extends AbstractFixture
 
         $hashedPassword = password_hash('admin_password', PASSWORD_BCRYPT);
 
-        $userAdmin->setPassword($hashedPassword);
+        $userAdmin->setPassword($hashedPassword);//
 
         $userAdmin->setRoles(['ROLE_ADMIN']);
 
@@ -31,7 +31,7 @@ class UserFixture extends AbstractFixture
         $user->setUsername('user');
 
         $hashedPassword = password_hash('user_password', PASSWORD_BCRYPT);
-        $user->setPassword($hashedPassword);
+        $user->setPassword($hashedPassword);//
 
         $manager->persist($user);
 

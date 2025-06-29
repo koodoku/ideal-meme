@@ -2,7 +2,7 @@
 
 namespace App\Tests\Controller;
 
-// Импорт нужных классов и фикстур
+
 use App\DataFixtures\AppFixtures;
 use App\Repository\UserRepository;
 use App\Tests\Fixture\ApplicationFixture;

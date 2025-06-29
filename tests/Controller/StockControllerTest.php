@@ -2,14 +2,11 @@
 
 namespace App\Tests\Controller;
 
-use App\DataFixtures\AppFixtures;
-use App\Entity\Application;
 use App\Entity\Stock;
 use App\Entity\User;
 use App\Repository\UserRepository;
-use App\Tests\Fixture\ApplicationFixture;
-use App\Tests\Fixture\StockFixture;
 use App\Tests\Fixture\PortfolioFixture;
+use App\Tests\Fixture\StockFixture;
 use App\Tests\Fixture\UserFixture;
 use Doctrine\Common\DataFixtures\Executor\ORMExecutor;
 use Doctrine\Common\DataFixtures\Loader;
@@ -18,59 +15,110 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class ApplicationControllerTest extends WebTestCase
+class StockControllerTest extends WebTestCase
 {
     private KernelBrowser $client;
     private ORMExecutor $executor;
-    private EntityManagerInterface $em;
+
     protected function setUp(): void
     {
-
         $this->client = static::createClient();
 
-        $this->em = $this->client->getContainer()->get('doctrine.orm.entity_manager');
+        /** @var EntityManagerInterface $em */
+        $em = $this->client->getContainer()->get('doctrine.orm.entity_manager');
 
         $loader = new Loader();
-        $loader->addFixture(new AppFixtures());
-        $loader->addFixture(new ApplicationFixture());
         $loader->addFixture(new UserFixture());
-        $loader->addFixture(new StockFixture());
-        $loader->addFixture(new PortfolioFixture());
-
-        $this->executor = new ORMExecutor($this->em, new ORMPurger());
+        $loader -> addFixture(new StockFixture());
+        $this->executor = new ORMExecutor($em, new ORMPurger());
         $this->executor->execute($loader->getFixtures());
 
         /** @var UserRepository $userRepository */
         $userRepository = $this->client->getContainer()->get(UserRepository::class);
-
         /** @var User $userAdmin */
         $userAdmin = $userRepository->findOneBy(['username' => 'admin']);
+
         $this->client->loginUser($userAdmin);
     }
 
     protected function tearDown(): void
     {
         parent::tearDown();
-
         $this->executor->getPurger()->purge();
     }
 
-    public function testIndex(): void
+    public function testNewStock(): void
     {
-        $this->client->request('GET', '/application');
+        $this->client->request('GET', '/stock/new');
+
+        $crawler = $this->client->submitForm('Save', [
+            'stock[name]' => 'Admin stock',
+            'stock[ticker]' => 'AST'
+        ]);
+
+        $this->assertResponseRedirects('/stock');
+        $this->client->followRedirect();
+
         $this->assertResponseIsSuccessful();
-        $this->assertSelectorExists('table');
     }
-    public function testGlass(): void
+
+    public function testIndex(): void
+    {    /** @var Stock $stock */
+        $stock = $this->executor->getReferenceRepository()->getReference(StockFixture::STOCK_TEST_REFERENCE);
+
+        $this->client->request('GET', '/stock');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('body', $stock->getName());
+    }
+
+    public function testShow(): void
     {
 
         /** @var Stock $stock */
         $stock = $this->executor->getReferenceRepository()->getReference(StockFixture::STOCK_TEST_REFERENCE);
 
-        $this->client->request('GET', '/application/glass/' . $stock->getId());
+        $this->client->request('GET', '/stock/' . $stock->getId());
 
         $this->assertResponseIsSuccessful();
-        $this->assertSelectorTextContains('h1', $stock->getName());
+        $this->assertSelectorTextContains('body', $stock->getName());
     }
+
+
+
+    public function testEditWithValidForm():void{
+        /** @var Stock $stock */
+        $stock = $this->executor->getReferenceRepository()->getReference(StockFixture::STOCK_TEST_REFERENCE);
+
+        $this->client->request('GET', '/stock/' . $stock->getId() . '/edit');
+        $this->assertResponseIsSuccessful();
+
+
+        $this->client->submitForm('Update', [
+            'stock[name]' => 'Updated stock',
+            'stock[ticker]' => 'UPD',
+        ]);
+
+
+        $this->assertResponseRedirects('/stock');
+        $this->client->followRedirect();
+        $this->assertSelectorTextContains('body', 'Updated stock');
+    }
+
+    public function testEditWithoutValidForm(): void
+    {
+        /** @var Stock $stock */
+        $stock = $this->executor->getReferenceRepository()->getReference(StockFixture::STOCK_TEST_REFERENCE);
+
+
+        $this->client->request('GET', '/stock/' . $stock->getId() . '/edit');
+
+        $this->client->submitForm('Update', [
+            'stock[name]' => '  ',
+            'stock[ticker]' => 'UPD',
+        ]);
+        $this->assertResponseStatusCodeSame(500);
+    }
+
 
 }

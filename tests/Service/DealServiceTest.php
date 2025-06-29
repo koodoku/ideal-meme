@@ -82,7 +82,7 @@ class DealServiceTest extends TestCase
 
             $expectedArgs = [[$originalApplication], [$appropriateApplication]];
             $callIndex = 0;
-            $this->applicationRepository->expects($this->exactly(2))
+            $this->applicationRepository->expects($this->exactly(2))//
                 ->method('removeApplication')
                 ->willReturnCallback(function() use (&$callIndex, $expectedArgs) {
                     \PHPUnit\Framework\TestCase::assertEquals($expectedArgs[$callIndex], func_get_args(), "removeApplication called with unexpected arguments at call $callIndex");

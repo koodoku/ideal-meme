@@ -29,6 +29,7 @@ class DealLogRepositoryTest extends KernelTestCase
         $kernel = self::bootKernel();
 
         $this->assertSame('test', $kernel->getEnvironment());
+
         $em = $kernel->getContainer()->get('doctrine.orm.entity_manager');
         $this->assertInstanceOf(EntityManager::class, $em);
 
@@ -39,6 +40,7 @@ class DealLogRepositoryTest extends KernelTestCase
 
         $this->executor = (new ORMExecutor($em, new ORMPurger()));
         $this->executor->execute($loader->getFixtures());
+
         $this->dealLogRepository = $em->getRepository(DealLog::class);
     }
 
@@ -53,6 +55,7 @@ class DealLogRepositoryTest extends KernelTestCase
         $dealLogs = $this->dealLogRepository->findByStock($findableStock);
 
         $this->assertCount(2, $dealLogs);
+
         foreach ($dealLogs as $dealLog) {
             $this->assertEquals($findableStock, $dealLog->getStock());
         }
@@ -73,12 +76,12 @@ class DealLogRepositoryTest extends KernelTestCase
 
         $latestDealLog = $this->dealLogRepository->findLatestByStock($findableStock);
         $this->assertEquals(
-            $this->dealLogFixture->getReference(DealLogFixture::NEWER_DEAL_LOG, DealLog::class),
+            $this->dealLogFixture->getReference(DealLogFixture::NEWER_DEAL_LOG, DealLog::class),// Сравниваем с ожидаемой (той, что была позже по дате в фикстурах)
             $latestDealLog
         );
     }
 
-    public function testFindLatestByStockNotFound(): void
+    public function testFindLatestByStockNotFound(): void // Тест, что если сделок по акции нет, будет возвращено null
     {
         $this->assertNull(
             $this->dealLogRepository->findLatestByStock(

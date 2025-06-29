@@ -58,7 +58,7 @@ class DealLogFixture extends AbstractFixture implements DependentFixtureInterfac
         $this->addReference(self::NEWER_DEAL_LOG, $newerDealLog);
     }
 
-    public function getDependencies(): array
+    public function getDependencies(): array //правильный порядок загрузки фикст
     {
         return [StockFixture::class, PortfolioFixture::class];
     }

@@ -1,4 +1,5 @@
 {% block body %}
+    <h1 id="stock-name">{{ stock.name }}</h1>
     <div style="margin: 1em 0;">
         <button onclick="showDayPicker()" class="btn btn-primary">День</button>
         <input type="date" id="dayPicker" style="display:none; margin-left:10px;" onchange="setTimeframe('day')">

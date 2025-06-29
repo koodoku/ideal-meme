@@ -22,9 +22,7 @@ class FreezeServiceTest extends TestCase
     /**
      * @dataProvider provideFreezeSellCases
      */
-
     public function testFreezeByApplicationSell(int $quantity): void
-
     {
         $stock = $this->createMock(Stock::class);
         $depositary = $this->createMock(Depositary::class);
@@ -37,10 +35,9 @@ class FreezeServiceTest extends TestCase
         $application->method('getPortfolio')->willReturn($portfolio);
 
         $portfolio->method('getDepositaryByStock')->with($stock)->willReturn($depositary);
-        $depositary->expects($this->once())->method('addFreezeQuantity')->with($quantity);
+        $depositary->expects($this->once())->method('addFreezeQuantity')->with($quantity); //Ассерт проверяет, что метод addFreezeQuantity() был вызван ровно один раз с аргументом $quantity. Это ключевое поведение при заморозке количества акций на продажу
 
         $this->freezeService->freezeByApplication($application);
-        $this->assertTrue(true); // добавила ассерты
     }
 
     public static function provideFreezeSellCases(): array
@@ -50,7 +47,6 @@ class FreezeServiceTest extends TestCase
             'freeze 10 units' => [10],
         ];
     }
-
 
     /**
      * @dataProvider provideFreezeBuyCases
@@ -64,10 +60,9 @@ class FreezeServiceTest extends TestCase
         $application->method('getTotal')->willReturn($total);
         $application->method('getPortfolio')->willReturn($portfolio);
 
-        $portfolio->expects($this->once())->method('addFreezeBalance')->with($total);
+        $portfolio->expects($this->once())->method('addFreezeBalance')->with($total);//Ассерт проверяет, что при покупке вызывается метод addFreezeBalance() один раз с точной суммой $total для заморозки денежных средств.
 
         $this->freezeService->freezeByApplication($application);
-        $this->assertTrue(true);
     }
 
     public static function provideFreezeBuyCases(): array
@@ -81,7 +76,6 @@ class FreezeServiceTest extends TestCase
     /**
      * @dataProvider provideUpdateSellCases
      */
-
     public function testUpdateFreezeByApplicationSell(int $oldQuantity, int $newQuantity): void
     {
         $stock = $this->createMock(Stock::class);
@@ -96,11 +90,10 @@ class FreezeServiceTest extends TestCase
 
         $portfolio->method('getDepositaryByStock')->with($stock)->willReturn($depositary);
 
-        $depositary->expects($this->once())->method('subFreezeQuantity')->with($oldQuantity)->willReturnSelf();
-        $depositary->expects($this->once())->method('addFreezeQuantity')->with($newQuantity);
+        $depositary->expects($this->once())->method('subFreezeQuantity')->with($oldQuantity)->willReturnSelf(); //Ассерт убеждается, что сначала снимается старая заморозка на количество акций через subFreezeQuantity($oldQuantity).
+        $depositary->expects($this->once())->method('addFreezeQuantity')->with($newQuantity); //Затем вызывается метод addFreezeQuantity($newQuantity) для установки нового количества заморозки. Это вторая часть актуализации данных.
 
         $this->freezeService->updateFreezeByApplication($application, $oldQuantity, $newQuantity);
-        $this->assertTrue(true);
     }
 
     public static function provideUpdateSellCases(): array
@@ -110,6 +103,7 @@ class FreezeServiceTest extends TestCase
             'update from 10 to 4 units' => [10, 4],
         ];
     }
+
     /**
      * @dataProvider provideUpdateBuyCases
      */
@@ -122,17 +116,16 @@ class FreezeServiceTest extends TestCase
         $application->method('getTotal')->willReturn($newTotal);
         $application->method('getPortfolio')->willReturn($portfolio);
 
-        $portfolio->expects($this->once())
+        $portfolio->expects($this->once()) //Ассерт проверяет, что старая сумма заморозки (рассчитанная как oldPrice * oldQuantity) корректно разблокируется через subFreezeBalance().
             ->method('subFreezeBalance')
             ->with($oldPrice * $oldQuantity)
             ->willReturnSelf();
 
-        $portfolio->expects($this->once())
+        $portfolio->expects($this->once()) //Затем устанавливается новая замороженная сумма — $newTotal. Проверяется, что она передаётся корректно в addFreezeBalance.
             ->method('addFreezeBalance')
             ->with($newTotal);
 
         $this->freezeService->updateFreezeByApplication($application, $oldQuantity, $oldPrice);
-        $this->assertTrue(true);
     }
 
     public static function provideUpdateBuyCases(): array
@@ -159,11 +152,9 @@ class FreezeServiceTest extends TestCase
         $application->method('getPortfolio')->willReturn($portfolio);
 
         $portfolio->method('getDepositaryByStock')->with($stock)->willReturn($depositary);
-
-        $depositary->expects($this->once())->method('subFreezeQuantity')->with($quantity);
+        $depositary->expects($this->once())->method('subFreezeQuantity')->with($quantity);//Ассерт проверяет, что при отмене заявки на продажу вызывается subFreezeQuantity($quantity) — т.е. акции размораживаются в нужном объёме.
 
         $this->freezeService->unfreezeByApplication($application);
-        $this->assertTrue(true);
     }
 
     public static function provideUnfreezeSellCases(): array
@@ -179,21 +170,16 @@ class FreezeServiceTest extends TestCase
      */
     public function testUnfreezeByApplicationBuy(float $total): void
     {
-        // Моки: портфель и заявка
         $portfolio = $this->createMock(Portfolio::class);
         $application = $this->createMock(Application::class);
 
-        // Настройка: это покупка, вернуть общую сумму и портфель
         $application->method('getAction')->willReturn(ActionEnum::BUY);
         $application->method('getTotal')->willReturn($total);
         $application->method('getPortfolio')->willReturn($portfolio);
 
-        // Проверка: должен быть вызван subFreezeBalance с total
-        $portfolio->expects($this->once())->method('subFreezeBalance')->with($total);
+        $portfolio->expects($this->once())->method('subFreezeBalance')->with($total); //Ассерт проверяет корректность вызова subFreezeBalance($total) — то есть разморозки денег при отмене заявки на покупку.
 
-        // Вызов метода разморозки по заявке на покупку
         $this->freezeService->unfreezeByApplication($application);
-        $this->assertTrue(true);
     }
 
     public static function provideUnfreezeBuyCases(): array

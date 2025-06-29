@@ -11,55 +11,49 @@ use Doctrine\Common\DataFixtures\Executor\ORMExecutor;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class UserRepositoryTest extends KernelTestCase // Тестовый класс для репозитория User, расширяет KernelTestCase Symfony
+class UserRepositoryTest extends KernelTestCase
 {
-    private UserFixture $userFixture; // Фикстура для загрузки тестовых пользователей
-    private UserRepository $userRepository; // Репозиторий User, который мы тестируем
+    private UserFixture $userFixture;
+    private UserRepository $userRepository;
     private ORMExecutor $executor; // ORMExecutor для управления загрузкой и очисткой фикстур
 
-    protected function setUp(): void // Метод, выполняемый перед каждым тестом
+    protected function setUp(): void
     {
-        $kernel = self::bootKernel(); // Запускаем Symfony Kernel (ядро приложения)
-        $this->assertSame('test', $kernel->getEnvironment()); // Проверяем, что мы в тестовом окружении
+        $kernel = self::bootKernel();
+        $this->assertSame('test', $kernel->getEnvironment());
 
-        // Получаем EntityManager из контейнера Symfony
         $em = $kernel->getContainer()->get('doctrine.orm.entity_manager');
-        $this->assertInstanceOf(EntityManager::class, $em); // Проверяем, что действительно получили EntityManager
+        $this->assertInstanceOf(EntityManager::class, $em);
 
-        // Создаем загрузчик фикстур и добавляем фикстуру пользователей
         $loader = new Loader();
         $loader->addFixture($this->userFixture = new UserFixture());
 
-        // Создаем ORMExecutor с пургером для управления фикстурами
         $this->executor = new ORMExecutor($em, new ORMPurger());
 
-        // Выполняем загрузку фикстур (создаем тестовые данные в БД)
         $this->executor->execute($loader->getFixtures());
 
-        // Получаем репозиторий User для последующего тестирования
         $this->userRepository = $em->getRepository(User::class);
     }
 
-    protected function tearDown(): void // Метод, выполняемый после каждого теста
+    protected function tearDown(): void
     {
-        $this->executor->getPurger()->purge(); // Очищаем базу данных, удаляя все тестовые данные
+        $this->executor->getPurger()->purge();
     }
 
-    public function testUpgradePassword(): void // Тест метода обновления пароля пользователя
+    public function testUpgradePassword(): void
     {
-        // Получаем ссылку на тестового пользователя из фикстуры по заранее заданному референсу
         $user = $this->executor->getReferenceRepository()->getReference(UserFixture::USER_USER_REFERENCE);
-        $this->assertInstanceOf(User::class, $user); // Проверяем, что получили объект User
+        $this->assertInstanceOf(User::class, $user);
 
-        $newPassword = 'new_password'; // Новый пароль для обновления
+        $newPassword = 'new_password';
+        $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
 
-        // Вызываем метод репозитория для обновления пароля пользователя
-        $this->userRepository->upgradePassword($user, $newPassword);
+        $this->userRepository->upgradePassword($user, $hashedPassword);
 
-        // Загружаем обновленного пользователя из базы данных
         $updatedUser = $this->userRepository->find($user->getId());
-        $this->assertNotNull($updatedUser); // Проверяем, что пользователь существует
-        $this->assertEquals($newPassword, $updatedUser->getPassword()); // Проверяем, что пароль обновился корректно
+        $this->assertNotNull($updatedUser);
+
+        $this->assertTrue(password_verify($newPassword, $updatedUser->getPassword()));
     }
 }
 
